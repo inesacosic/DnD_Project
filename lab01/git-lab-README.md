@@ -19,6 +19,8 @@ Git is a distributed version control system that allows you to keep track of you
 - `git clone`
 - `git switch`
 - `git remote`
+- `git branch`
+- `git stash`
 
 ## Submission
 - Clone this repository using the `git clone ` command
