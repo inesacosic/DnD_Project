@@ -27,19 +27,6 @@ def best_hand(hand):
 
     return a[index]
 
-
-
-    
-    #best_hand=b[0]
-    #index_of_BH = 0
-    #for i in range(len(b)-1):
-        #if b[i] > best_hand:
-            #best_hand = b[i]
-            #index_of_BH = i
-
-    #print (list(a[index_of_BH]))
-
-
     
 # ------------------
 # Provided Functions
