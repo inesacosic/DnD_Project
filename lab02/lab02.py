@@ -20,8 +20,26 @@ import itertools
 
 def best_hand(hand):
     "From a 7-card hand, return the best 5 card hand."
-    # Your code here
-    pass
+    a = [x for x in itertools.combinations(hand, 5)] # find all possible combinations of the hand
+    b = [hand_rank(list(x)) for x in a] # find the rank for each combination 
+    highest = max(b) # get the highest rank
+    index = b.index(highest)
+
+    return a[index]
+
+
+
+    
+    #best_hand=b[0]
+    #index_of_BH = 0
+    #for i in range(len(b)-1):
+        #if b[i] > best_hand:
+            #best_hand = b[i]
+            #index_of_BH = i
+
+    #print (list(a[index_of_BH]))
+
+
     
 # ------------------
 # Provided Functions
