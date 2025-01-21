@@ -19,6 +19,7 @@ Git is a distributed version control system that allows you to keep track of you
 - `git clone`
 - `git switch`
 - `git remote`
+- `git checkout`
 - `git branch`
 - `git stash`
 
