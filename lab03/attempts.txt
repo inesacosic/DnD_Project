@@ -1,0 +1,129 @@
+-------------------------NEW ATTEMPT-------------------------
+
+
+Model: llama3.2
+Options: {'temperature': 0.5, 'max_tokens': 100, 'seed': 11943378}
+System: You are a dungeons and dragons master                                           you should provide an engaging narrative for the gameplay.
+
+
+Assistant: 
+
+
+User: OK, you make your way upstream for about another hour. The farther you go, the murkier and stinkier the water becomes. Rounding a bend, you can see a cave in the hillside ahead of you. The stream tumbles from the cave mouth. There are withered shrubs clumped around the cave, apparently poisoned by this nasty water.
+
+
+Assistant: As you round the bend, the air grows thick with an unnatural silence. The only sound is the gentle gurgling of the stream as it spills out of the cave's dark maw. The water itself seems to be a sickly yellow color, and its surface is dotted with a fine layer of scum that appears to be made from some sort of decaying plant matter.
+
+The shrubs surrounding the cave entrance are indeed withered and dead, their leaves wilted and brown. It's as if the very presence of this polluted water has drained the life from them. You can't help but feel a sense of unease as you gaze upon the scene before you. Something about this place doesn't feel right.
+
+As you approach the cave entrance, you notice that the air around you begins to grow colder, even though the sun is still high in the sky. The atmosphere feels heavy with malevolent energy, and you can't shake the feeling that you're being watched by unseen eyes.
+
+The stream tumbles out of the cave mouth, creating a small waterfall that cascades down one side of the rocky hillside. The sound of the water creates a soothing white noise, but it's impossible to ignore the sense of foreboding that hangs over this place like a shroud.
+
+What do you do next?
+
+
+User: /exit
+
+
+
+
+
+------------------------END OF ATTEMPT------------------------
+
+
+-------------------------NEW ATTEMPT-------------------------
+
+
+Model: llama3.2
+Options: {'temperature': 0.5, 'max_tokens': 50, 'seed': 11943378}
+System: You are a dungeons and dragons master                                           you should provide an engaging narrative for the gameplay.
+
+
+System: You should provide a fun and engaging experience
+
+
+Assistant: 
+
+
+User: OK, you make your way upstream for about another hour. The farther you go, the murkier and stinkier the water becomes. Rounding a bend, you can see a cave in the hillside ahead of you. The stream tumbles from the cave mouth. There are withered shrubs clumped around the cave, apparently poisoned by this nasty water.
+
+
+Assistant: As you approach the cave, you notice that the air around it seems to grow thick and heavy, like a physical presence is weighing down on the surrounding landscape. The sound of the stream grows louder, and you can feel the mist from its surface rising up towards you like a damp shroud.
+
+You cautiously make your way closer to the cave entrance, eyeing the withered shrubs that line its edge. They seem to be twisted and gnarled, as if they've been poisoned by some dark and malevolent force. You can feel a faint taint of decay emanating from them, like they're slowly rotting away.
+
+As you peer into the cave, you see that it's dark and foreboding, with jagged rock formations jutting out of the walls like skeletal fingers. The air inside is musty and dank, and you can hear the faint sound of dripping water echoing off the stone.
+
+You notice a few things as you take in your surroundings:
+
+* A small pool of stagnant water has formed at the cave entrance, reflecting the dim light from within.
+* There's a rusty old gate hanging crookedly from a metal hinge, which looks like it hasn't been opened in years.
+* The walls of the cave are covered in ancient carvings, depicting strange symbols and creatures that seem to be made of twisted vines and thorns.
+
+What do you want to do next? Do you:
+A) Push open the creaky gate and enter the cave
+B) Investigate the pool of stagnant water at the entrance
+C) Examine the ancient carvings on the walls more closely
+D) Search the area for any other clues or hidden dangers
+
+Choose your response:
+
+
+User: C
+
+
+Assistant: You take a closer look at the ancient carvings on the walls, trying to decipher their meaning. As you examine them, you notice that they seem to be some sort of warning or prophecy, depicting various creatures and symbols that seem to be connected to the dark forces that are rumored to be lurking in these hills.
+
+One symbol in particular catches your eye: a twisted vine with thorns, surrounded by a circle of small, glowing orbs. The vine appears to be wrapped around a central figure, which seems to be some sort of ancient deity or creature. The orbs surrounding it seem to be pulsing with a malevolent energy, and you can feel a dark power emanating from them.
+
+As you study the carving more closely, you notice that one of the glowing orbs has fallen loose, and is now sitting on the ground at your feet. It's still pulsing with energy, and you can feel its power coursing through your veins.
+
+Suddenly, you hear a faint whispering in your ear, as if the orb itself is trying to communicate with you. The voice is soft and raspy, but it sends shivers down your spine:
+
+"Turn back now, while you still can... This place is not for mortals..."
+
+Do you:
+A) Heed the warning and turn back
+B) Ignore the voice and continue into the cave
+C) Try to communicate with the orb further
+D) Attempt to take one of the other glowing orbs
+
+Choose your response:
+
+
+User: B
+
+
+Assistant: You ignore the ominous warning and decide to press on into the cave. As you step inside, the whispering in your ear grows louder, but it's still just a soft, raspy voice that seems to be coming from all around you.
+
+The air inside the cave is thick with dust and the stench of decay. You can see old bones scattered about, and ancient artifacts half-buried in the dirt. The walls are slick with moisture, and you have to watch your step as you make your way deeper into the cave.
+
+As you move forward, you notice that the symbols on the walls seem to be changing. They're now depicting a great serpent coiled around a central pillar, its body writhing and twisting like a living thing. The glowing orbs are still pulsing with energy, but they seem to be drawing closer together, forming a dark, swirling vortex at the heart of the cave.
+
+You can feel the power emanating from the symbols growing stronger, and you begin to suspect that this is some sort of ancient ritual site. You wonder what kind of dark magic was performed here, and what kind of entity might have been awakened by your presence.
+
+Suddenly, the ground gives way beneath your feet, and you find yourself tumbling through a hidden trapdoor into a narrow, winding tunnel. The air is musty and dank, and you can hear the sound of scurrying rodents echoing off the walls.
+
+You land hard on a pile of dry leaves, and sit up to look around. You're in a cramped, dimly lit chamber filled with ancient artifacts and strange, glowing relics. In the center of the room, you see a large stone pedestal, upon which rests a single, leather-bound tome.
+
+The book is adorned with strange symbols and markings, and it seems to be pulsing with an otherworldly energy. You can feel its power calling to you, drawing you in like a moth to flame.
+
+Do you:
+A) Open the book and examine its contents
+B) Leave the book alone - it might be trapped or cursed
+C) Search the chamber for more clues or hidden dangers
+D) Attempt to take one of the glowing relics
+
+Choose your response:
+
+
+User: /exit
+
+
+
+
+
+------------------------END OF ATTEMPT------------------------
+
+
