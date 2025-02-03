@@ -58,10 +58,10 @@ because I didn't explicity tell it to.
 >Added another message with system role a gave the context: 'You should provide a fun and engaging experience.'
 
 #### Result
-Engages with the user more by providing description and giving the user options on what to do next. Has the exact same format everytime--provides description and give the user four options. This could become monotonous.
+>Engages with the user more by providing description and giving the user options on what to do next. Has the exact same format everytime--provides description and give the user four options. This could become monotonous.
 
 #### Reflection/Analysis of result
-It seems that adding another message for the system pushed the model to be a more effective/engaging DM.
+>It seems that adding another message for the system pushed the model to be a more effective/engaging DM.
 
 
 #### Fourth attempt
