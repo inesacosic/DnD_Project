@@ -1,4 +1,5 @@
 from dndnetwork import DungeonMasterServer, PlayerClient
+from llm_utils import TemplateChat
 
 
 class DungeonMaster:
@@ -12,6 +13,9 @@ class DungeonMaster:
     def dm_turn_hook(self):
         dm_message = ''
         # Do DM things here. You can use self.game_log to access the game log
+        template_file = 'util/templates/dm_chat.json'
+        chat = TemplateChat.from_file(template_file)
+        chat_generator = chat.start_chat()
 
         # Return a message to send to the players for this turn
         return dm_message 
