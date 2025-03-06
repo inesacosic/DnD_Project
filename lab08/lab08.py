@@ -29,7 +29,8 @@ class OllamaEmbeddingFunction:
     
     def __call__(self, input: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of texts using Ollama"""
-        pass
+        embeddings=[]
+
 
 
 def load_documents(data_dir: str) -> Dict[str, str]:
