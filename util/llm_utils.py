@@ -57,7 +57,7 @@ class TemplateChat:
         self.messages = self.instance['messages']
         self.end_regex = kwargs['end_regex'] if 'end_regex' in kwargs else None
         self.function_caller = kwargs['function_call_processor'] if 'function_call_processor' in kwargs else None
-        process_response_method = kwargs['process_response'] if 'process_response' in kwargs else lambda x: x 
+        process_response_method = kwargs['process_response'] if 'process_response' in kwargs else lambda self, x: x 
         self.process_response = MethodType(process_response_method, self)
         self.parameters = kwargs
 
