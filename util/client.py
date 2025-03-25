@@ -1,5 +1,7 @@
 from base import Player
 
 player_1 = Player('inesa')
-while True:
-    player_1.connect()
+player_1.connect()
+while True: 
+    turn = input("Client: ")
+    player_1.take_turn(turn)

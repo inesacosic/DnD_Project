@@ -45,7 +45,12 @@ class DungeonMasterServer:
         # Do the countdown here in the main thread to block until done
         self.start_countdown()
         # Once countdown finishes, start the turn-based game
-        threading.Thread(target=self.game_loop, daemon=True).start()
+        self.game_thread = threading.Thread(target=self.game_loop, daemon=True)
+        self.game_thread.start()
+
+    def end_server(self):
+        self.game_thread.join()
+
 
     def accept_clients(self):
         while True:
@@ -171,10 +176,11 @@ class PlayerClient:
             try:
                 data = self.sock.recv(1024)
                 if not data:
-                    break
+                    continue
                 print(data.decode().strip())
-            except ConnectionResetError:
+            except ConnectionResetError as e:
                 print("[Player] Connection closed by server.")
+                print(e)
                 break
 
     def send_message(self, msg: str):

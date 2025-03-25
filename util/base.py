@@ -16,10 +16,13 @@ class DungeonMaster:
         template_file = 'util/templates/dm_chat.json'
         chat = TemplateChat.from_file(template_file)
         chat_generator = chat.start_chat()
-
+        dm_message = next(chat_generator)
+        # dm_message="hello"
         # Return a message to send to the players for this turn
         return dm_message 
 
+    def end_server(self):
+        self.server.end_server()
 
 class Player:
     def __init__(self, name):

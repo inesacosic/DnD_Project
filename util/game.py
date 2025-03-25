@@ -15,9 +15,9 @@ DM = DungeonMaster()
 ## start the server
 ## starts a background thread that accepts clients 
 DM.start_server()
+DM.end_server()
 
-while True:
-    time.sleep(1)
+
 
 
 
