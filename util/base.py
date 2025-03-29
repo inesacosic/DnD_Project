@@ -4,11 +4,10 @@ from llm_utils import TemplateChat
 
 class DungeonMaster:
     def __init__(self):
-        self.game_log = '' 
+        self.game_log = ['START']
         self.server = DungeonMasterServer(self.game_log, self.dm_turn_hook)
+        self.chat = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello')
         self.start = True
-        template_file = 'util/templates/dm_chat.json'
-        self.chat = TemplateChat.from_file(template_file)
 
     def start_server(self):
         self.server.start_server()
@@ -18,9 +17,10 @@ class DungeonMaster:
         # Do DM things here. You can use self.game_log to access the game log
         if self.start:
             dm_message = self.chat.start_chat()
-        else:
-            dm_message = self.chat.send('')
-        # dm_message="hello"
+            self.start = False
+        else: 
+            dm_message = self.chat.send('\n'.join(self.game_log))
+
         # Return a message to send to the players for this turn
         return dm_message 
 
