@@ -1,5 +1,5 @@
 {
-  "model": "deepseek-r1:1.5b",
+  "model": "llama3.2:latest",
   "options": {
     "temperature": 0.2
   },
