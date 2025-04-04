@@ -15,6 +15,7 @@ running the game loop until all players have left.
 import socket
 import threading
 import time
+from pathlib import Path
 
 class DungeonMasterServer:
     def __init__(self, game_log, dm_hook=lambda : '', host="127.0.0.1", port=5555, countdown=10):
@@ -36,6 +37,7 @@ class DungeonMasterServer:
 
         self.dm_hook = dm_hook
         self.update_log = lambda msg: game_log.append(msg+'\n')
+        self.file_string = ''
 
     def start_server(self):
         print(f"[LOG] Listening on {self.host}:{self.port}")
@@ -86,7 +88,8 @@ class DungeonMasterServer:
         if client_sock in self.clients:
             addr, name = self.clients[client_sock]
             print(f"[LOG] Removing client {addr}: {reason}")
-            del addr
+            # make sure client is removed from client list
+            del self.clients[client_sock]
         client_sock.close()
 
 
@@ -104,6 +107,8 @@ class DungeonMasterServer:
 
         while self.running:
             if not self.clients:
+                # if there are no more clients in the game, save the game_log into a text document
+                self.save_data('----------END GAME----------')
                 print("[LOG] No players left. Stopping game.")
                 self.running = False
                 break
@@ -147,13 +152,26 @@ class DungeonMasterServer:
 
     def broadcast(self, message: bytes):
         """Send a message to all connected players."""
-        print(f"[LOG] Broadcasting: {message.decode().strip()}")
-        self.update_log(message.decode().strip())
+        message_decode = message.decode().strip()
+        print(f"[LOG] Broadcasting: {message_decode}")
+        self.update_log(message_decode)
+        self.save_data(message_decode)
         for client_sock in list(self.clients.keys()):
             try:
                 client_sock.sendall(message)
             except OSError:
                 self.remove_client(client_sock, reason="Send failed.")
+    
+    def save_data(self, message_decode):
+        # this function logs the game data to be used for RAG
+        with open(Path('util/gamelogs.txt'), 'a') as f:
+            if self.file_string == '':
+                self.file_string += '---------- NEW GAME ----------\n\n\n'
+                f.write(self.file_string)
+            f.write(f'{message_decode}\n')
+            
+
+
 
 
 # player.py
