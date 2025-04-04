@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 RAG (Retrieval-Augmented Generation) Demo Script
 Using ChromaDB for vector storage, chunking, and Ollama for both embeddings and LLM generation
@@ -30,6 +30,10 @@ class OllamaEmbeddingFunction:
     def __call__(self, input: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of texts using Ollama"""
         embeddings=[]
+        for text in input:
+             embed_response = ollama.embed(model=self.model_name, input=text)
+             embeddings.append(embed_response.embeddings[0])
+        return embeddings
 
 
 
@@ -117,7 +121,12 @@ def retrieve_context(collection: chromadb.Collection, query: str, n_results: int
     """
     Retrieve relevant context from ChromaDB based on the query
     """
-    pass
+    closest_embeddings =collection.query(
+         query_texts=query,
+         n_results=n_results,
+     )
+ 
+    return closest_embeddings["documents"][0]
 
 
 
