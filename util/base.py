@@ -1,11 +1,9 @@
 from dndnetwork import DungeonMasterServer, PlayerClient
-from llm_utils import TemplateChat
+from llm_utils import TemplateChat, insert_params
+import requests
 
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parents[1]))
-
-from lab08.lab08 import OllamaEmbeddingFunction, load_documents, chunk_documents, setup_chroma_db
+import datetime
+import json
 
 
 class DungeonMaster:
@@ -23,34 +21,72 @@ class DungeonMaster:
         dm_message = ''
         # Do DM things here. You can use self.game_log to access the game log
 
-
         if self.start:
-            # load in game log documents 
-            data_dir = 'C:/CMPSC_441/DnD_Project/util'
-            documents = load_documents(data_dir)
 
-            # chunk documents 
-            chunks = chunk_documents(documents)
+            # store the parameters 
+            self.chat.parameters |= {'context': self.get_latest_game()} # latest game
 
-            # set up chromadb
-            collection = setup_chroma_db(
-                chunks, 
-                ollama_model=self.embedding_model
-            )
-
-            # set up query to find chats relevant to current connected clients 
-            client_names = []
-            for client in self.server.clients:
-                client_names.append(client[1])
-
+            # store latest game as context in messages
+            for item in self.chat.messages:
+                item['content'] = insert_params(item['content'], **self.chat.parameters)
 
             dm_message = self.chat.start_chat()
             self.start = False
         else: 
+
+            # insert the current players names into the name parameter so DM can address current player by name
+            params = {'name': self.server.current_client}
+            for item in self.chat.messages:
+                item['content'] = insert_params(item['content'], **params)
+
             dm_message = self.chat.send('\n'.join(self.game_log))
 
         # Return a message to send to the players for this turn
         return dm_message 
+    
+    def get_latest_game(self):
+
+        now = int(datetime.datetime.now().timestamp()) # current date
+        two_weeks_ago = now - 14 * 24 * 60 * 60 # date two weeks ago
+
+        results = self.server.collection.get(
+            where = {"date": {"$gt": two_weeks_ago}} # get the collections where the date is greater than two weeks ago
+        )
+
+        if not results['metadatas']:
+            print('No recent games found')
+            return None
+        
+        # Sort by date descending
+        sorted_data = sorted(
+            zip(results["metadatas"], results["documents"]),
+            key=lambda x: x[0]["date"],
+            reverse=True
+        )
+
+        latest_document = sorted_data[0][1]
+        return latest_document
+
+
+    def create_character(character_class):
+        # Use API for character creation based on chosen class
+        url = f"https://www.dnd5eapi.co/api/2014/classes/{character_class}"
+
+
+        payload = {}
+        headers = {
+        'Accept': 'application/json'
+        }
+
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        data = json.loads(response.text)
+
+        print(data)
+
+
+
 
 
 class Player:
