@@ -15,7 +15,18 @@ running the game loop until all players have left.
 import socket
 import threading
 import time
+import datetime
+import chromadb
+import uuid # helps create unique identifier for chromadb documents
+
 from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).parents[1]))
+
+from lab08.lab08 import OllamaEmbeddingFunction
+
+from pathlib import Path
+
 
 class DungeonMasterServer:
     def __init__(self, game_log, dm_hook=lambda : '', host="127.0.0.1", port=5555, countdown=10):
@@ -29,6 +40,7 @@ class DungeonMasterServer:
 
         # Track connected clients in a dict: {client_socket: addr}
         self.clients = {}
+        self.current_client = ''
         self.game_started = False
         self.running = True
 
@@ -37,7 +49,12 @@ class DungeonMasterServer:
 
         self.dm_hook = dm_hook
         self.update_log = lambda msg: game_log.append(msg+'\n')
-        self.file_string = ''
+
+        # Saving game information
+        self.collection = self.set_up_chromadb()
+        self.character_info_log = []
+        self.game_events_log = []
+        self.joined_players = ''
 
     def start_server(self):
         print(f"[LOG] Listening on {self.host}:{self.port}")
@@ -52,16 +69,23 @@ class DungeonMasterServer:
         game_thread.join()
 
     def accept_clients(self):
+        # List to store usernames of players
+        players = []
         while True:
             client_sock, addr = self.server_socket.accept()
             name = client_sock.recv(1024).decode()
             self.clients[client_sock] = addr, name
             self.broadcast(f"[LOG] New connection from {addr}. Welcome {name}!".encode())
+            # add player to list
+            players.append(name)
             # Notify them if the game started or not
             if self.game_started:
                 client_sock.sendall(b"[LOG] You are ready to join the game!\n")
             else:
                 client_sock.sendall(b"[LOG] You joined before the countdown ended!\n")
+
+            # Save currently joined player usernames 
+            joined_players = " ".join(players)
 
             # Each connected client is handled in its own thread
 
@@ -78,6 +102,10 @@ class DungeonMasterServer:
                 else:
                     # The player is submitting their turn action
                     self.broadcast_action(client_sock, msg)
+                    # save the player's whos turn it currently is to use as a parameter so the DM can address players by name
+                    addr, name = self.clients[client_sock]
+                    self.current_client = name
+
                 break
             except ConnectionResetError:
                 self.remove_client(client_sock, reason="Connection reset.")
@@ -107,8 +135,8 @@ class DungeonMasterServer:
 
         while self.running:
             if not self.clients:
-                # if there are no more clients in the game, save the game_log into a text document
-                self.save_data('----------END GAME----------')
+                # if there are no more clients in the game, save the game 
+                self.save_data()
                 print("[LOG] No players left. Stopping game.")
                 self.running = False
                 break
@@ -120,6 +148,17 @@ class DungeonMasterServer:
 
             dm_message = self.dm_hook()
             self.broadcast(f'[DM] {dm_message}'.encode())
+
+            # Save the DM's response
+            CHARACTER_KEYWORDS = ['character information', 'character', 'class', 'race', 'abilities']
+
+            if any(keyword in dm_message.lower() for keyword in CHARACTER_KEYWORDS):
+                # If the response conatins character information, save to the corresponding list
+                self.character_info_log.append(dm_message)
+            else:
+                # else just save to game events
+                self.game_events_log.append(dm_message)
+            
 
             self.broadcast(b"\n\nPlease enter your action (or '/quit' to leave)\n")
 
@@ -148,6 +187,10 @@ class DungeonMasterServer:
         addr, name  = self.clients[client_sock]
 
         out_msg = f"[{name}] -> {msg}\n".encode()
+
+        # Add the players action to game events list
+        self.game_events_log.append(out_msg.decode())
+
         self.broadcast(out_msg)
 
     def broadcast(self, message: bytes):
@@ -155,24 +198,56 @@ class DungeonMasterServer:
         message_decode = message.decode().strip()
         print(f"[LOG] Broadcasting: {message_decode}")
         self.update_log(message_decode)
-        self.save_data(message_decode)
         for client_sock in list(self.clients.keys()):
             try:
                 client_sock.sendall(message)
             except OSError:
                 self.remove_client(client_sock, reason="Send failed.")
     
-    def save_data(self, message_decode):
-        # this function logs the game data to be used for RAG
-        with open(Path('util/gamelogs.txt'), 'a') as f:
-            if self.file_string == '':
-                self.file_string += '---------- NEW GAME ----------\n\n\n'
-                f.write(self.file_string)
-            f.write(f'{message_decode}\n')
-            
+    def save_data(self):
+        character_info = "\n".join(self.character_info_log)
+        game_events = "\n".join(self.game_events_log)
+
+        game_time = datetime.datetime.now()
+        game_time_epoch = int(game_time.timestamp())
+
+        document = f"""
+        Game Session Log
+        Date: {game_time.isoformat()}
+        Players: {self.joined_players}
+
+        Character Information:
+        {character_info}
+
+        Game Events:
+        {game_events}
+
+        ----------END GAME----------
+        """
+
+        self.collection.add(
+            ids=[str(uuid.uuid4())], # generate a unique ID for each document
+            documents=[document],
+            metadatas=[{"date": game_time_epoch}]
+        )
 
 
+    def set_up_chromadb(self):
+        collection_name = "dnd_knowledge"
 
+        client = chromadb.PersistentClient(path = "./chroma")
+        embedding_function = OllamaEmbeddingFunction(model_name = "nomic-embed-text")
+
+        try:
+            collection = client.get_collection(collection_name)
+        except:
+            collection = client.create_collection(
+            name=collection_name,
+            embedding_function=embedding_function
+            )
+
+        return collection
+        
 
 # player.py
 
