@@ -18,6 +18,7 @@ import time
 import datetime
 import chromadb
 import uuid # helps create unique identifier for chromadb documents
+from llm_utils import TemplateChat
 
 from pathlib import Path
 import sys
@@ -54,7 +55,10 @@ class DungeonMasterServer:
         self.collection = self.set_up_chromadb()
         self.character_info_log = []
         self.game_events_log = []
-        self.joined_players = ''
+        self.joined_players = []
+
+        # bool variable for switching prompts/agents
+        self.switch = False
 
     def start_server(self):
         print(f"[LOG] Listening on {self.host}:{self.port}")
@@ -70,22 +74,18 @@ class DungeonMasterServer:
 
     def accept_clients(self):
         # List to store usernames of players
-        players = []
         while True:
             client_sock, addr = self.server_socket.accept()
             name = client_sock.recv(1024).decode()
             self.clients[client_sock] = addr, name
             self.broadcast(f"[LOG] New connection from {addr}. Welcome {name}!".encode())
-            # add player to list
-            players.append(name)
+            # Add player to list
+            self.joined_players.append(name)
             # Notify them if the game started or not
             if self.game_started:
                 client_sock.sendall(b"[LOG] You are ready to join the game!\n")
             else:
                 client_sock.sendall(b"[LOG] You joined before the countdown ended!\n")
-
-            # Save currently joined player usernames 
-            joined_players = " ".join(players)
 
             # Each connected client is handled in its own thread
 
@@ -185,13 +185,21 @@ class DungeonMasterServer:
         if client_sock not in self.clients:
             return
         addr, name  = self.clients[client_sock]
-
         out_msg = f"[{name}] -> {msg}\n".encode()
 
         # Add the players action to game events list
         self.game_events_log.append(out_msg.decode())
 
         self.broadcast(out_msg)
+
+        # Merchant keyword to see if the player is asking to trade
+        MERCHANT_Keywords = ['merchant', 'trade', 'want to trade', 'is there a merchant']
+        # If there is any suspicion the user want to trade, use the selection.json template to determine 
+        # whether to switch agents to the trader NPC agent 
+        if any(keywords in msg.lower() for keywords in MERCHANT_Keywords):
+            self.switch = True
+
+
 
     def broadcast(self, message: bytes):
         """Send a message to all connected players."""
@@ -214,15 +222,13 @@ class DungeonMasterServer:
         document = f"""
         Game Session Log
         Date: {game_time.isoformat()}
-        Players: {self.joined_players}
+        Players: {", ".join(self.joined_players)}
 
         Character Information:
         {character_info}
 
         Game Events:
         {game_events}
-
-        ----------END GAME----------
         """
 
         self.collection.add(
@@ -231,16 +237,17 @@ class DungeonMasterServer:
             metadatas=[{"date": game_time_epoch}]
         )
 
-
     def set_up_chromadb(self):
         collection_name = "dnd_knowledge"
-
+        # Set up a persitent client
         client = chromadb.PersistentClient(path = "./chroma")
         embedding_function = OllamaEmbeddingFunction(model_name = "nomic-embed-text")
 
         try:
+            # If the collection already exists, grab it
             collection = client.get_collection(collection_name)
         except:
+            # Else create a new collection
             collection = client.create_collection(
             name=collection_name,
             embedding_function=embedding_function
