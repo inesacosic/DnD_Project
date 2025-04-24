@@ -10,9 +10,12 @@ class DungeonMaster:
     def __init__(self):
         self.game_log = ['START']
         self.server = DungeonMasterServer(self.game_log, self.dm_turn_hook)
+        # general DM template
         self.chat = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello')
         self.start = True
         self.embedding_model = "nomic-embed-text"
+        # selection template
+        self.selection = TemplateChat.from_file('util/templates/selection_chat.json', sign = 'hello')
 
     def start_server(self):
         self.server.start_server()
@@ -52,10 +55,10 @@ class DungeonMaster:
     def get_latest_game(self):
         # get current date and date two weeks ago
         now = int(datetime.datetime.now().timestamp()) 
-        two_weeks_ago = now - 14 * 24 * 60 * 60 
+        four_weeks_ago = now - 28 * 24 * 60 * 60 
         # get the collections where the date is greater than two weeks ago
         results = self.server.collection.get(
-            where = {"date": {"$gt": two_weeks_ago}}
+            where = {"date": {"$gt": four_weeks_ago}}
         )
 
         if not results['metadatas']:
@@ -74,13 +77,13 @@ class DungeonMaster:
         return latest_document
     
     def switch_prompts(self):
-        selection = TemplateChat.from_file('util/templates/selection_chat.json', sign = 'hello')
         # get the last 5 turns from the game log and insert into parameters
-        self.selection.parameters  |= {{'ask': " ".join(self.game_log[-5:])}}
+        recent_turns = " ".join(self.game_log[-5:])
+        params =  {'ask': recent_turns}
         for item in self.selection.messages:
-            item['user'] = insert_params(item['user'], **self.chat.parameters)
-        response = selection.completion() 
-        selected = json.loads(response.choices[0].message.content)
+                item['content'] = insert_params(item['content'], **params)
+        response = self.selection.completion() 
+        selected = json.loads(response.message.content)
         # return to selected prompt
         return selected
 
