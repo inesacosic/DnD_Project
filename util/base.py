@@ -35,12 +35,15 @@ class DungeonMaster:
             self.start = False
         else: 
             if self.server.switch is True:
-                selected = self.switch_prompts()
-                dm_message = TemplateChat.from_file(selected['as'] + '_chat.json', sign = 'hello').completion({
-                'action': selected['action'],
-                'task': selected['task']})
                 self.server.switch = False
-                return dm_message
+                selected = self.switch_prompts()
+                if selected['as'] == 'dm':
+                    pass 
+                else:
+                    dm_message = TemplateChat.from_file('util/templates/' + selected['as'] + '_chat.json', sign = 'hello').completion(kwargs = {
+                    'action': selected['action'],
+                    'task': selected['task']})
+                    return dm_message
             
             # insert the current players name into the name parameter so DM can address current player by name
             params = {'name': self.server.current_client}
@@ -86,6 +89,7 @@ class DungeonMaster:
         selected = json.loads(response.message.content)
         # return to selected prompt
         return selected
+        # test
 
 
 
