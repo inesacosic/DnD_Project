@@ -1,5 +1,6 @@
 from dndnetwork import DungeonMasterServer, PlayerClient
 from llm_utils import TemplateChat, insert_params
+from trader import Trader
 import requests
 
 import datetime
@@ -34,16 +35,21 @@ class DungeonMaster:
             dm_message = self.chat.start_chat()
             self.start = False
         else: 
+            # if there is any suspicion of user wanting to trade
+            # check user request usuing selection prompt and 
+            # run trader agent if user does indeed want to trade
             if self.server.switch is True:
-                self.server.switch = False
                 selected = self.switch_prompts()
-                if selected['as'] == 'dm':
-                    pass 
-                else:
-                    dm_message = TemplateChat.from_file('util/templates/' + selected['as'] + '_chat.json', sign = 'hello').completion(kwargs = {
-                    'action': selected['action'],
-                    'task': selected['task']})
-                    return dm_message
+
+                if selected['as'] == 'trader':
+                    # recent 5 turns from users 
+                    recent_turns = " ".join(self.game_log[-5:])
+                    self.trader = Trader(user_input = recent_turns)
+                    self.trader.run_console_chat()
+
+                    # save the trading information to the general dm agent for context
+                    self.chat.messages.append(self.trader.trader_log)
+                self.server.switch = False
             
             # insert the current players name into the name parameter so DM can address current player by name
             params = {'name': self.server.current_client}
@@ -89,7 +95,6 @@ class DungeonMaster:
         selected = json.loads(response.message.content)
         # return to selected prompt
         return selected
-        # test
 
 
 
