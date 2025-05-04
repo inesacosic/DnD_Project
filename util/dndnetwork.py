@@ -236,6 +236,7 @@ class DungeonMasterServer:
             documents=[document],
             metadatas=[{"date": game_time_epoch}]
         )
+        print("Game saved\n")
 
     def set_up_chromadb(self):
         collection_name = "dnd_knowledge"
