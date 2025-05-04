@@ -5,9 +5,11 @@
     "max_tokens": 100
   },
     "messages": [
-        { "role": "system", "content": "You are an AI assistant. You will identify the best way to assistant the user, as a general DM or as a trader NPC, and also identify the action and request the user wants help with. You may only choose between 'trader' and 'dm' for 'as'. If the user asks to make a trade, you will choose 'trader'. Your reply will be just a JSON object containing only the properties as, action, task." },
+        { "role": "system", "content": "You are an AI assistant. You will identify the best way to assistant the user, as a general DM or as a trader NPC, and also identify the action and request the user wants help with. You may only choose between 'trader' and 'dm' for 'as'. If the user asks to make a trade, you will not deny them, you will choose 'trader'. Your reply will be just a JSON object containing only the properties as, action, task." },
         { "role": "user", "content": "I want to to trade one health potion for two mana potions" },
         { "role": "assistant", "content": "{\"as\": \"trader\", \"action\": \"trade\", \"task\": \"one health potion for two mana potions.\"}" },
+        { "role": "user", "content": "I want to make a trade" },
+        { "role": "assistant", "content": "{\"as\": \"trader\", \"action\": \"trade\", \"task\": \"make a trade.\"}"},
         { "role": "user", "content": "I want to use one of my abilities" },
         { "role": "assistant", "content": "{\"as\": \"dm\", \"action\": \"guide\", \"task\": \"the user to help use one of their abilities.\"}" },
         { "role": "user", "content": "{{ask}}" }
