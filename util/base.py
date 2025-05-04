@@ -12,54 +12,65 @@ class DungeonMaster:
         self.game_log = ['START']
         self.server = DungeonMasterServer(self.game_log, self.dm_turn_hook)
         # general DM template
-        self.chat = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello')
+        self.generalDM = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello')
+        # trader NPC template
+        self.trader = TemplateChat.from_file(
+                sign='hello', 
+                template_file = 'util/templates/trader_chat.json',
+                end_regex = r'TRADE(.*)DONE'
+        )
+        self.chat = self.generalDM
+
         self.start = True
         self.embedding_model = "nomic-embed-text"
         # selection template
         self.selection = TemplateChat.from_file('util/templates/selection_chat.json', sign = 'hello')
+        self.initialize = True
 
     def start_server(self):
         self.server.start_server()
 
     def dm_turn_hook(self):
         dm_message = ''
-        # Do DM things here. You can use self.game_log to access the game log
+        try:
+            if self.start:
+                # check if there was a previous game and load it into parameters
+                self.chat.parameters |= {'context': self.get_latest_game()} 
+                # store latest game as context in messages
+                for item in self.chat.messages:
+                    item['content'] = insert_params(item['content'], **self.chat.parameters)
 
-        if self.start:
-            # check if there was a previous game and load it into parameters
-            self.chat.parameters |= {'context': self.get_latest_game()} 
-            # store latest game as context in messages
-            for item in self.chat.messages:
-                item['content'] = insert_params(item['content'], **self.chat.parameters)
+                dm_message = self.chat.start_chat()
+                self.start = False
+            else: 
+                # if there is any suspicion of user wanting to trade
+                # check user request usuing selection prompt and 
+                # run trader agent if user does indeed want to trade
+                if self.server.switch is True:
+                    selected = self.switch_prompts()
+                    if selected['as'] == 'trader':
+                        # switch to trader chat
+                        self.chat = self.trader
+                        if self.initialize == True:
+                            dm_message = self.chat.start_chat()
+                            self.initialize = False
+                            return dm_message
+                    self.server.switch = False
+                
+                # insert the current players name into the name parameter so DM can address current player by name
+                params = {'name': self.server.current_client}
+                for item in self.chat.messages:
+                    item['content'] = insert_params(item['content'], **params)
 
-            dm_message = self.chat.start_chat()
-            self.start = False
-        else: 
-            # if there is any suspicion of user wanting to trade
-            # check user request usuing selection prompt and 
-            # run trader agent if user does indeed want to trade
-            if self.server.switch is True:
-                selected = self.switch_prompts()
+                dm_message = self.chat.send('\n'.join(self.game_log))
 
-                if selected['as'] == 'trader':
-                    # recent 5 turns from users 
-                    recent_turns = " ".join(self.game_log[-5:])
-                    self.trader = Trader(user_input = recent_turns)
-                    self.trader.run_console_chat()
-
-                    # save the trading information to the general dm agent for context
-                    self.chat.messages.append(self.trader.trader_log)
-                self.server.switch = False
-            
-            # insert the current players name into the name parameter so DM can address current player by name
-            params = {'name': self.server.current_client}
-            for item in self.chat.messages:
-                item['content'] = insert_params(item['content'], **params)
-
-            dm_message = self.chat.send('\n'.join(self.game_log))
-
-        # Return a message to send to the players for this turn
-        return dm_message 
+            # Return a message to send to the players for this turn
+            return dm_message 
+        except StopIteration as e:
+                if isinstance(e.value, tuple):
+                    dm_message = e.value[0]
+                    self.chat = self.generalDM
+                    return dm_message
     
     def get_latest_game(self):
         # get current date and date two weeks ago
@@ -95,8 +106,6 @@ class DungeonMaster:
         selected = json.loads(response.message.content)
         # return to selected prompt
         return selected
-
-
 
     def create_character(character_class):
         # Use API for character creation based on chosen class
