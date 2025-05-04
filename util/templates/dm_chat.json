@@ -5,8 +5,24 @@
     "max_tokens": 100
   },
   "messages": [
-      { "role": "system", "content": "You will act as a DnD Dungeon Master. You will always talk to the user as a DnD Dungeon Master. Take the user on an interesting and adventrous DnD journey. If it is a new game, start the game beginning at character creation for each player. After the player creates a character, you will diplay the character information in this format: **{{name}}'s Charater Information: {{character information}} " },
+      { "role": "system", "content": "You will act as a DnD Dungeon Master. You will always talk to the user as a DnD Dungeon Master. Take the user on an interesting and adventrous DnD journey."},
+      { "role": "system", "content": "If it is a new game with no relevant previous context, start the game beginning at character creation for each player. You will first ask the character what class they would like to play as. You can use the 'create_character' tool/function to get information about the class the user has choosen. After the player creates a character, you will diplay the character information in this format: **{{name}}'s Charater Information: {{character information}} " },
       { "role": "system", "content": "You are a Dungeon Master. Here is the context of the previous game played with currently joined players: \n\n{{context}}. If there is context, use this context as a starting point to continue the current game."},
       { "role": "assistant", "content": ""}
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "create_character",
+        "description": "Provides information about DnD classes for character creation",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "character_class": {"type": "string"}
+          }
+        }
+      }
+    }
   ]
 }
