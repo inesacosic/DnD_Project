@@ -1,18 +1,56 @@
 from dndnetwork import DungeonMasterServer, PlayerClient
-from llm_utils import TemplateChat, insert_params
-from trader import Trader
+from llm_utils import TemplateChat, insert_params, tool_tracker
 import requests
 
 import datetime
 import json
 
+@tool_tracker
+def process_function_call(function_call):
+    name = function_call.name
+    args = function_call.arguments
+
+    return globals()[name](**args)
+
+def create_character(character_class):
+        # Use API for character creation based on chosen class
+        url = f"https://www.dnd5eapi.co/api/2014/classes/{character_class.lower()}"
+        payload = {}
+        headers = {
+        'Accept': 'application/json'
+        }
+        response = requests.get(url, headers=headers)
+        data = response.json() 
+
+        summarizer = TemplateChat.from_file('util/templates/summary_chat.json', sign = 'hello')
+        
+        params_summarizer = {'character_info': "\n".join(data)}
+        for item in summarizer.messages:
+                    item['content'] = insert_params(item['content'], **params_summarizer)
+        response = summarizer.completion()
+        summary = response.message.content
+        return summary
+
+def process_response(self, response):
+    if response.message.tool_calls:
+        tool_call = process_function_call(response.message.tool_calls[0].function)
+        self.messages.append({'role': 'tool',
+                        'name': response.message.tool_calls[0].function.name, 
+                        'arguments': response.message.tool_calls[0].function.arguments,
+                        'content': tool_call
+                        })
+        params = {'class_information': tool_call}
+        for item in self.messages:
+                item['content'] = insert_params(item['content'], **params)
+        response = self.completion()
+    return response
 
 class DungeonMaster:
     def __init__(self):
         self.game_log = ['START']
         self.server = DungeonMasterServer(self.game_log, self.dm_turn_hook)
         # general DM template
-        self.generalDM = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello')
+        self.generalDM = TemplateChat.from_file('util/templates/dm_chat.json', sign='hello', process_response = process_response)
         # trader NPC template
         self.trader = TemplateChat.from_file(
                 sign='hello', 
@@ -67,6 +105,7 @@ class DungeonMaster:
             # Return a message to send to the players for this turn
             return dm_message 
         except StopIteration as e:
+                # when the agent returns a message with end_regex handle it 
                 if isinstance(e.value, tuple):
                     dm_message = e.value[0]
                     self.chat = self.generalDM
@@ -75,22 +114,32 @@ class DungeonMaster:
     def get_latest_game(self):
         # get current date and date two weeks ago
         now = int(datetime.datetime.now().timestamp()) 
-        four_weeks_ago = now - 28 * 24 * 60 * 60 
+        two_weeks_ago = now - 14 * 24 * 60 * 60 
         # get the collections where the date is greater than two weeks ago
         results = self.server.collection.get(
-            where = {"date": {"$gt": four_weeks_ago}}
+            where={"date": {"$gt": two_weeks_ago}}
         )
 
         if not results['metadatas']:
             print('No recent games found')
             return None
         
+        filtered_results = [
+            (doc, meta) for doc, meta in zip(results["documents"], results["metadatas"])
+            if all(player in meta["Players"] for player in self.server.joined_players)
+        ]
+
+        if not filtered_results:
+            print('No games found with all current players')
+            return None
+
         # Sort by date descending
         sorted_data = sorted(
-            zip(results["metadatas"], results["documents"]),
+            filtered_results,
             key=lambda x: x[0]["date"],
             reverse=True
         )
+
         # return document portion of latest game
         latest_document = sorted_data[0][1]
 
@@ -106,20 +155,6 @@ class DungeonMaster:
         selected = json.loads(response.message.content)
         # return to selected prompt
         return selected
-
-    def create_character(character_class):
-        # Use API for character creation based on chosen class
-        url = f"https://www.dnd5eapi.co/api/2014/classes/{character_class}"
-        payload = {}
-        headers = {
-        'Accept': 'application/json'
-        }
-        response = requests.request("GET", url, headers=headers, data=payload)
-        data = json.loads(response.text)
-        print(data)
-
-
-
 
 
 class Player:
