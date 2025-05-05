@@ -234,7 +234,9 @@ class DungeonMasterServer:
         self.collection.add(
             ids=[str(uuid.uuid4())], # generate a unique ID for each document
             documents=[document],
-            metadatas=[{"date": game_time_epoch}]
+            metadatas=[{
+                "date": game_time_epoch,
+                "Players": ", ".join(self.joined_players)}]
         )
         print("Game saved\n")
 
