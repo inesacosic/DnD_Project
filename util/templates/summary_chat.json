@@ -1,0 +1,11 @@
+{
+    "model": "llama3.2:latest",
+    "options": {
+    "temperature": 0.3,
+    "max_tokens": 100
+  },
+    "messages": [
+        { "role": "system", "content": "The user will provide you with {{character_info}}, which is a JSON object containing information about a class in Dungeons and Dragons. You will summarize the {{character_info}} into a brief summary using natural language to help the user create a character based on the specific class given. For example, if the 'index' is 'rogue', you should summarize the important information provided by the user about the rogue class."},
+        { "role": "user", "content": "{{character_info}}"}
+    ]
+}
