@@ -5,7 +5,7 @@
 2. Complex NPC interactions
 3. In depth character creation for new players 
 
-The number's in the following sections correspond to what scenerio they help implement
+The numbers in the following sections correspond to what scenerio they help implement
 
 # Section 2--**Prompt Engineering and Model Parameter Choice**
 
