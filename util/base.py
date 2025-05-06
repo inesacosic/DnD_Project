@@ -21,28 +21,25 @@ def create_character(character_class):
         }
         response = requests.get(url, headers=headers)
         data = response.json() 
-
+        # create model for summarizing the response from the API
         summarizer = TemplateChat.from_file('util/templates/summary_chat.json', sign = 'hello')
-        
+        # insert the response from API into the models template
         params_summarizer = {'character_info': "\n".join(data)}
         for item in summarizer.messages:
                     item['content'] = insert_params(item['content'], **params_summarizer)
+        # do some summarizing..
         response = summarizer.completion()
         summary = response.message.content
         return summary
 
 def process_response(self, response):
     if response.message.tool_calls:
-        tool_call = process_function_call(response.message.tool_calls[0].function)
-        self.messages.append({'role': 'tool',
-                        'name': response.message.tool_calls[0].function.name, 
-                        'arguments': response.message.tool_calls[0].function.arguments,
-                        'content': tool_call
-                        })
-        params = {'class_information': tool_call}
-        for item in self.messages:
-                item['content'] = insert_params(item['content'], **params)
-        response = self.completion()
+            # calls the function to g
+            tool_call = process_function_call(response.message.tool_calls[0].function)
+            params = {'class_information': tool_call}
+            for item in self.messages:
+                    item['content'] = insert_params(item['content'], **params)
+            response = self.completion()
     return response
 
 class DungeonMaster:
@@ -136,12 +133,12 @@ class DungeonMaster:
         # Sort by date descending
         sorted_data = sorted(
             filtered_results,
-            key=lambda x: x[0]["date"],
+            key=lambda x: x[1].get("date", 0),
             reverse=True
         )
 
         # return document portion of latest game
-        latest_document = sorted_data[0][1]
+        latest_document = sorted_data[0][0]
 
         return latest_document
     
