@@ -54,12 +54,12 @@ class DungeonMaster:
                 template_file = 'util/templates/trader_chat.json',
                 end_regex = r'TRADE(.*)DONE'
         )
-        self.chat = self.generalDM
-
-        self.start = True
-        self.embedding_model = "nomic-embed-text"
         # selection template
         self.selection = TemplateChat.from_file('util/templates/selection_chat.json', sign = 'hello')
+        self.chat = self.generalDM
+        self.start = True
+        self.embedding_model = "nomic-embed-text"
+        # used when switching from generalDM model to trader model
         self.initialize = True
 
     def start_server(self):
