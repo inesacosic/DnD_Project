@@ -1,7 +1,7 @@
 {
   "model": "llama3.2",
   "options": {
-    "temperature": 0,
+    "temperature": 0.4,
     "max_tokens": 100
   },
   "messages": [
