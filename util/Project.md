@@ -3,8 +3,7 @@
 
 1. Integrating previous established lore into current storytelling
 2. Complex NPC interactions
-3. Automated dice rolls for skills, combat, and saves
-4. In depth character creation for new players 
+3. In depth character creation for new players 
 
 # Section 2--**Prompt Engineering and Model Parameter Choice**
 
@@ -13,7 +12,7 @@
 2. In this project I created a seperate agent to act as a trader (NPC). When the user inputs something that suggests they may want to make a trade, the user's input will be fed to an agent with the prompt given in **selection_chat.json.** This prompts checks whether the general dm agent or trader agent should be used based on the user's input. It has a *temprature* set to 0 because it's job is to decide between DM or trader, without creativity. The *max_tokens* option is set to 50 since, in general, this agent should only generate a one line response. 
     1. If the selection agent returns a response for trader, then the self.chat variable in base.py will switch to the trader agent to complete the trade, which uses **trader_chat.json** template. When the trade is finished, the agent is instructed to output a response containing the end_regex of 'TRADE(.*)DONE' which will switch the self.chat variable back to the general DM agent. The *temperature* for this template is set to 0.4, since it should be creative but not so creative that it takes too long to generate the end regex. The *max_tokens* are set to 100, similar to the general DM template. 
 
-4. To use the tool 'create_character' to help the DnD create character's for new players, I had to edit the **dm_chat.json** template to add a 'tools' section. I also edited the system prompt to let the agent know that it can use the 'create_character' tool when it needs to create a character for a player.  
+3. To use the tool 'create_character' to help the DnD create character's for new players, I had to edit the **dm_chat.json** template to add a 'tools' section. I also edited the system prompt to let the agent know that it can use the 'create_character' tool when it needs to create a character for a player.  
 
 # Section 3--**Tools Usage**
 
@@ -24,7 +23,11 @@
 
 # Section 4--**Planning and Reasoning**
 
-4. One issue I ran into while trying to integrate the 'create_character' tool call was that I noticed the agent would call the tool uneccessarily and too often. In order to prevent this, I had to edit the system prompt to 
+2. I used few shot learning in some templates, including **trader_chat.json** and **selection_chat.json**. In trader chat I gave the system prompt examples of what it should be outputting when it makes a trade. In the selection template I provided several messages with different roles, including assistant and user, to exemplify what the assistant should be generating based on what the user inputs.
+
+4. One issue I ran into while trying to integrate the 'create_character' tool call was that I noticed the agent would call the tool uneccessarily and too often. In order to prevent this, I had to edit the system prompt to use chain-of-thought thinking when going through character creation. Specifically, I stated that the following steps should be used to create a character: (1) ask for a character's class (2) use the 'create_character' tool (3) add characters abilities. I told the model that they should follow this process step-by-step (chain-of-thought)
+
+
 # Section 5--**Rag Implementation**
 
 1. In the DungeonMasterServer class, I set up a function called set_up_chromadb() which creates a persistant chromadb client and creates a collection called 'dnd_knowledge'. If there is no collection named 'dnd_knowledge', it will create one, otherwise it will retrieve it. Throughout the game, I save user and DM responses into two lists, character_info_log and game_events_log, in attempt to help the DM recognize a players character info for future games. When all players leave the game, the function save_data() is called which stores all the game information from these lists along with the date and joined players into the chromadb collection. 
@@ -33,4 +36,6 @@
 
 
 # Section 6--**Additional Tools/Innovation**
+
+For this project, I tried to implement text-to-audio using a model from HuggingFace, which is what the code in audio_generator.py was for. However, unfortunatelty I was not able to successfully implement this section of the project. My hope was that I could use the audio generator to produce an audio when the model gave a specific description of a setting. For example if the model were to describe the character being in a forest, an audio of a spooky forest with rustling leaves would be created.
 
