@@ -120,7 +120,7 @@ class DungeonMaster:
         if not results['metadatas']:
             print('No recent games found')
             return None
-        
+        # filter results to get only the ones with all currently joined players
         filtered_results = [
             (doc, meta) for doc, meta in zip(results["documents"], results["metadatas"])
             if all(player in meta["Players"] for player in self.server.joined_players)
